@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
   phoneNumber:{
     type: Number,
   },
+  resetPassword:{
+    type: Number,
+  },
   addresses:[
     {
       country: {

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import {
-  LoginPage,
-  SignupPage,
+  AuthPage,
   ActivationPage,
   HomePage,
 
@@ -32,9 +31,8 @@ const App = () => {
     <BrowserRouter>
  
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/sign-up" element={<SignupPage />} />
+        {/* <Route path="/" element={<HomePage />} /> */}
+        <Route path="/" element={<AuthPage />} />
         <Route
           path="/activation/:activation_token"
           element={<ActivationPage />}
