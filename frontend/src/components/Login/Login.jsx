@@ -5,8 +5,11 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import { useRef } from "react";
+
 const PrincipaleLogin = () => {
   const [authType, setAuthType] = useState(1);
+  const [resetPasswordPhone, setResetPasswordPhone] = useState(1);
 
   switch (authType) {
     case 1:
@@ -14,7 +17,9 @@ const PrincipaleLogin = () => {
     case 2:
       return <Singup setAuthType={setAuthType} />;
     case 3:
-      return <ResetPassword setAuthType={setAuthType} />;
+      return <ResetPassword setResetPasswordPhone={setResetPasswordPhone} setAuthType={setAuthType} />;
+    case 4:
+      return <ResetPasswordPsw resetPasswordPhone={resetPasswordPhone} setAuthType={setAuthType} />;
     default:
       return <Login />;
   }
@@ -175,11 +180,13 @@ const Singup = ({ setAuthType }) => {
     e.preventDefault();
 
     axios
-      .post(`${server}/user/create-user`, { email, password })
+      .post(`${server}/user/create-user`,       
+       { email, password }, { withCredentials: true })
       .then((res) => {
         toast.success(res.data.message);
         setEmail("");
         setPassword("");
+        setAuthType(1)
       })
       .catch((error) => {
         toast.error(error.response.data.message);
@@ -286,17 +293,27 @@ const Singup = ({ setAuthType }) => {
   );
 };
 
-const ResetPassword = ({ setAuthType }) => {
+const ResetPassword = ({ setAuthType, setResetPasswordPhone }) => {
   const [email, setEmail] = useState("");
 
+
+  const onChangehandler =async (e)=>{
+    if(e.target.name==="email"){
+    setEmail(e.target.value)
+    setResetPasswordPhone(e.target.value)
+  }
+  
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     axios
-      .post(`${server}/user/resetpasswordphn`, { email })
+      .post(`${server}/user/resetpasswordphn`        
+      ,{ email } ,{ withCredentials: true })
       .then((res) => {
         toast.success(res.data.message);
         setEmail("");
+        setAuthType(4);
         // setPassword("");
       })
       .catch((error) => {
@@ -331,7 +348,7 @@ const ResetPassword = ({ setAuthType }) => {
                   required
                   placeholder="ايميل خود را وارد كنيد"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={onChangehandler}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
@@ -355,7 +372,7 @@ const ResetPassword = ({ setAuthType }) => {
                 }}
                 className="text-blue-600 pl-2 cursor-pointer"
               >
-                بازگشت به خانه
+                بازگشت به صفحه اصلي
               </span>
             </div>
           </form>
@@ -365,51 +382,106 @@ const ResetPassword = ({ setAuthType }) => {
   );
 };
 
-const ResetPasswordPsw = ({ setAuthType }) => {
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
+const ResetPasswordPsw = ({ setAuthType ,resetPasswordPhone}) => {
+  const [resetCode, setResectCode] = useState("");
+  const [firstPassword, setFirstPassword] = useState("");
+  const [secondPassword, setSecondPassword] = useState("");
+  const [pswError, setPswError] = useState(false);
 
+
+
+  const navigate = useNavigate();
+
+
+
+
+  const changehandler=(e)=>{
+    e.preventDefault();
+
+    // if(e.target.value===e.target.value){
+    //   resetpsw2.current.style.border="1px solid orange"
+
+    if(e.target.name ==="resetCode"){
+      setResectCode(e.target.value)}
+    if(e.target.name ==="firstPassword"){
+      setFirstPassword(e.target.value)
+    }
+    if(e.target.name ==="secondPassword"){
+      setSecondPassword(e.target.value)
+    }
+   
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    axios
-      .post(`${server}/user/create-user`, { password })
-      .then((res) => {
-        toast.success(res.data.message);
-        setPassword("");
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      });
+    // if (password !== password2) {
+      axios
+        .post(`${server}/user/resetpasswordpsw`, { firstPassword,resetCode,secondPassword,resetPasswordPhone })
+        .then((res) => {
+          toast.success(res.data.message);
+          setResectCode("");
+          setFirstPassword("");
+          setSecondPassword("");
+          // window.location.reload(true);
+
+
+        })
+        .catch((error) => {
+          toast.error(error.response.data.message);
+        }); 
+    // } else {
+    //   setPswError("");
+    // }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          پسوورد جديد خود را وارد كنيد
+          نوسازي رمز عبور
         </h2>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div></div>
-
+            <div>
+              {/* <h3>كد ارسال شده را وارد كنيد</h3> */}
+            </div>
+            <div>
+              <label 
+                htmlFor="password"
+                className=" block text-sm font-medium  mb-7  text-gray-700"
+              >كد ارسال شده را وارد كنيد</label>
+              <div className="mt-1 relative flex justify-center">
+                <input
+                  type={"text"}
+                  name="resetCode"
+                  autoComplete="current-password"
+                  required
+                
+                  placeholder="inter reset code"
+                  value={resetCode}
+                  onChange={changehandler}
+                  className=" appearance-none block w-35 px-3 text-center py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
             <div>
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                نو سازي رمز عبور
+                رمز عبور جديد
               </label>
               <div className="mt-1 relative">
                 <input
                   type={"password"}
-                  name="password"
+                  name="firstPassword"
+
                   autoComplete="current-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={firstPassword}
+                  onChange={changehandler}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
@@ -419,19 +491,20 @@ const ResetPasswordPsw = ({ setAuthType }) => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                نو سازي رمز عبور
+                تكرار رمز عبور جديد
               </label>
               <div className="mt-1 relative">
                 <input
                   type="password"
-                  name="password"
+                  name="secondPassword"
                   autoComplete="current-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={secondPassword}
+                  onChange={changehandler}
+                  className={`appearance-none block w-full px-3 py-2 border border-gray-300 border-gray-300  rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm `}
                 />
               </div>
+
             </div>
 
             <div>
@@ -445,10 +518,8 @@ const ResetPasswordPsw = ({ setAuthType }) => {
             <div className={`${styles.noramlFlex} w-full`}>
               <h4>قبلا ثبت نام كرده ايد ؟</h4>
               <span
-                onClick={(e) => {
-                  e.preventDefault();
-                  setAuthType(1);
-                }}
+                onClick={(e)=>{e.preventDefault()
+                  setAuthType(1)}}
                 className="text-blue-600 pl-2 cur cursor-pointer"
               >
                 ورود
@@ -460,5 +531,65 @@ const ResetPasswordPsw = ({ setAuthType }) => {
     </div>
   );
 };
+
+
+
+// const Logout = ({ setAuthType ,resetPasswordPhone}) => {
+
+//   const changehandler=(e)=>{
+  
+//   }
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     // if (password !== password2) {
+//       axios
+//         .get(`${server}/user/logout`)
+//         .then((res) => {
+//           toast.success(res.data.message);
+       
+//            navigate('/');
+
+
+//         })
+//         .catch((error) => {
+//           toast.error(error.response.data.message);
+//         }); 
+//     // } else {
+//     //   setPswError("");
+//     // }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+//       <div className="sm:mx-auto sm:w-full sm:max-w-md">
+//         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+//           پسوورد جديد خود را وارد كنيد
+//         </h2>
+//       </div>
+//       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+//         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+//           <form className="space-y-6" onSubmit={handleSubmit}>
+//             <div></div>
+           
+            
+
+//             <div>
+//               <button
+//                 type="submit"
+//                 className="group relative w-full h-[40px] flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+//               >
+//                 ارسال
+//               </button>
+//             </div>
+            
+//           </form>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+
 
 export default PrincipaleLogin;

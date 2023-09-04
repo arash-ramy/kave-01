@@ -196,7 +196,8 @@ router.post(
       if (email === null || email === undefined || email === "") {
         return next(new ErrorHandler("enter a vlid Email", 400));
       }
-      const userEmail = await User.findOne({ email }).select("-role")
+      const userEmail = await User.findOne({ email })
+      console.log(userEmail,"userFounded")
 
       if (!userEmail) {
         return next(
@@ -210,19 +211,26 @@ router.post(
       const genCode =Math.floor(100000 + Math.random() * 900000);
 
        userEmail.resetPassword=genCode;
+      console.log(userEmail,'this is')
 
+      // const userWithResetPassword= await userEmail.save;
 
-       await userEmail.save;
-      // const www = (user) => {
-      //   return jwt.sign({user}, process.env.ACTIVATION_SECRET, {
-      //     expiresIn: "5m",
-      //   });
-      // };
-      // const resetToken = www(userEmail);
+      userEmail.resetPassword = genCode;
+      userEmail.verificationDate = new Date();
+      console.log(genCode)
+      
+      await userEmail.save();
 
-      // console.log("activationToken____For__CREATE__USER", resetToken);
-
-      // const resetUrl = `http://localhost:3000/resetpassword/${resetToken}`;
+      const verificationDateExp = new Date(
+        userEmail.verificationDate.getTime() + 120 * 1000
+      );
+    
+      if (verificationDateExp < new Date()) {
+        userEmail.verificationCode = "";
+        userEmail.verificationDate = null;
+        await userEmail.save();
+        return next(new AppError("کد تایید منقضی شده است", 401));
+      }
 
       try {
         await sendMail({
@@ -246,13 +254,48 @@ router.post(
 );
 
 // reset user password part2
-router.get(
+router.post(
   "/resetpasswordpsw",
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const { password, passwordConfirm } = req.body;
+      const { firstPassword ,   secondPassword ,resetCode , resetPasswordPhone} = req.body;
+      if(!firstPassword || !secondPassword || !resetCode){
+        return next(
+          new ErrorHandler(
+            "ورودي ها چك شود",
+            400
+          )
+        );
+      }
+      if(firstPassword !==secondPassword){
+        return next(new ErrorHandler("عدم تطابق گذرواژه ", 401));
+
+      }
+      if(firstPassword <= 6){
+        return next(new ErrorHandler("رمز كوتاه است ", 401));
+
+      }
+      const user = await User.find({email: resetPasswordPhone }) 
+       .where('resetPassword').equals(resetCode)
+
+      // .select("-resetPassword")
+      // console.log(user.password,"099")
+      if(!user || user.length<=0){
+        return next(new ErrorHandler("كد وارد شده صحيح نيست", 401));
+
+      }
+      console.log(user,"inja khatas")
+      user[0].password = firstPassword;
+      await user[0].save();
+
+
+      res.status(200).json({
+        message:"عمليات نوسازي رمز عبور با موفقيت انجام شد"
+      })
+      console.log(req.body,"dd")
     } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
+      console.log(error.message)
+      return next(new ErrorHandler("خطا ورودي ها چك شود", 401));
     }
   })
 );
