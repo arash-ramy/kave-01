@@ -5,7 +5,8 @@ const User = require("../model/user");
 
 exports.isAuthenticated = catchAsyncErrors(async(req,res,next) => {
     const {token} = req.cookies;
-
+    const {testi} = req.cookies;
+console.log(testi)
     if(!token){
         return next(new ErrorHandler("Please login to continue", 401));
     }

@@ -423,7 +423,7 @@ const ResetPasswordPsw = ({ setAuthType ,resetPasswordPhone}) => {
           setFirstPassword("");
           setSecondPassword("");
           // window.location.reload(true);
-
+          setAuthType(1);
 
         })
         .catch((error) => {
