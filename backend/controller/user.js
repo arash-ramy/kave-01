@@ -66,7 +66,6 @@ router.post("/create-user", async (req, res, next) => {
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-    
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
@@ -196,8 +195,8 @@ router.post(
       if (email === null || email === undefined || email === "") {
         return next(new ErrorHandler("enter a vlid Email", 400));
       }
-      const userEmail = await User.findOne({ email })
-      console.log(userEmail,"userFounded")
+      const userEmail = await User.findOne({ email });
+      console.log(userEmail, "userFounded");
 
       if (!userEmail) {
         return next(
@@ -208,23 +207,23 @@ router.post(
         );
       }
 
-      const genCode =Math.floor(100000 + Math.random() * 900000);
+      const genCode = Math.floor(100000 + Math.random() * 900000);
 
-       userEmail.resetPassword=genCode;
-      console.log(userEmail,'this is')
+      userEmail.resetPassword = genCode;
+      console.log(userEmail, "this is");
 
       // const userWithResetPassword= await userEmail.save;
 
       userEmail.resetPassword = genCode;
       userEmail.verificationDate = new Date();
-      console.log(genCode)
-      
+      console.log(genCode);
+
       await userEmail.save();
 
       const verificationDateExp = new Date(
         userEmail.verificationDate.getTime() + 120 * 1000
       );
-    
+
       if (verificationDateExp < new Date()) {
         userEmail.verificationCode = "";
         userEmail.verificationDate = null;
@@ -240,13 +239,12 @@ router.post(
         });
         res.status(201).json({
           success: true,
-          message: `please check your email:- ${userEmail.email} to reset your account!`,
+          message: `please check your email:- 
+          ${userEmail.email} to reset your account!`,
         });
       } catch (error) {
         return next(new ErrorHandler(error.message, 500));
       }
-    
-     
     } catch (err) {
       return next(new ErrorHandler(err, 500));
     }
@@ -258,43 +256,36 @@ router.post(
   "/resetpasswordpsw",
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const { firstPassword ,   secondPassword ,resetCode , resetPasswordPhone} = req.body;
-      if(!firstPassword || !secondPassword || !resetCode){
-        return next(
-          new ErrorHandler(
-            "ورودي ها چك شود",
-            400
-          )
-        );
+      const { firstPassword, secondPassword, resetCode, resetPasswordPhone } =
+        req.body;
+      if (!firstPassword || !secondPassword || !resetCode) {
+        return next(new ErrorHandler("ورودي ها چك شود", 400));
       }
-      if(firstPassword !==secondPassword){
+      if (firstPassword !== secondPassword) {
         return next(new ErrorHandler("عدم تطابق گذرواژه ", 401));
-
       }
-      if(firstPassword <= 6){
+      if (firstPassword <= 6) {
         return next(new ErrorHandler("رمز كوتاه است ", 401));
-
       }
-      const user = await User.find({email: resetPasswordPhone }) 
-       .where('resetPassword').equals(resetCode)
+      const user = await User.find({ email: resetPasswordPhone })
+        .where("resetPassword")
+        .equals(resetCode);
 
       // .select("-resetPassword")
       // console.log(user.password,"099")
-      if(!user || user.length<=0){
+      if (!user || user.length <= 0) {
         return next(new ErrorHandler("كد وارد شده صحيح نيست", 401));
-
       }
-      console.log(user,"inja khatas")
+      console.log(user, "inja khatas");
       user[0].password = firstPassword;
       await user[0].save();
 
-
       res.status(200).json({
-        message:"عمليات نوسازي رمز عبور با موفقيت انجام شد"
-      })
-      console.log(req.body,"dd")
+        message: "عمليات نوسازي رمز عبور با موفقيت انجام شد",
+      });
+      console.log(req.body, "dd");
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
       return next(new ErrorHandler("خطا ورودي ها چك شود", 401));
     }
   })
@@ -320,6 +311,22 @@ router.get(
   })
 );
 
+router.get(
+  "/getalluser",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const users = await User.find();
+
+      res.status(201).json({
+        success: true,
+        message:"fetching data successfullky",
+        users:users
+      })
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
 // // update user info
 // router.put(
 //   "/update-user-info",

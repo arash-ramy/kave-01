@@ -1,0 +1,32 @@
+.ticket-main{
+    /* background-color: rebeccapurple; */
+    width: 100%;
+    display: flex;
+    
+}
+.right-tkt,.left-tkt{
+    margin-top: 40px;
+    flex: 1;
+}
+.right-tkt{
+    border-right: 1px solid black;
+
+}
+
+.ticket-subsel{
+    display: flex;
+    gap: 20px;
+}
+.ticket-subsel select{
+    padding: 5px;
+   border-top-left-radius: 5px;
+   border-top-right-radius: 5px;
+
+   background-color: blue;
+   color :white;
+    border: none;
+}
+.ticket-subsel .optionS{
+    padding: 5px;
+
+}

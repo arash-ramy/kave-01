@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthPage, ActivationPage, HomePage } from "./routes/Routes.js";
+import {
+  AuthPage,
+  ActivationPage,
+  HomePage,
+  ChatPage,
+} from "./routes/Routes.js";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,24 +20,34 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 // import { loadStripe } from "@stripe/stripe-js";
 import Dashboard from "./pages/Dashboard";
 import UserInbox from "./pages/UserInbox";
+// import ChatPage from "./pages/chatPage/chatPage";
 
 const App = () => {
   const [user, setUser] = useState();
   useEffect(() => {
     console.log(user, "this is user in app.js");
-    Store.dispatch(loadUser())
+    Store.dispatch(loadUser());
 
-    // setUser(Store.dispatch(loadUser()));
+    setUser(Store.dispatch(loadUser()));
   }, []);
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage user={user} />} />
+        {/* <Route path="/" element={<HomePage user={user} />} /> */}
         <Route path="/auth" element={<AuthPage />} />
         <Route
           path="/activation/:activation_token"
           element={<ActivationPage />}
+        />
+
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <ChatPage  />{" "}
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/dashboard"
