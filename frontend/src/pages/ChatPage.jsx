@@ -1,196 +1,477 @@
-import { useSelector } from "react-redux";
-import React, { useState, useEffect } from "react";
-import socketIO from "socket.io-client";
-import { format } from "timeago.js";
 import { server } from "../server";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 
+
+
+// MUI
+
+import { useTheme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import Chip from '@mui/material/Chip';
+
+const ITEM_HEIGHT = 48;
+
+//END MUI
 function ChatPage() {
-  const ENDPOINT = "http://localhost:4000";
-  const socket = socketIO.connect("http://localhost:4000");
-  const [section, setSection] = useState(1);
-  
-  const [selectOptionReadonly, setselectOptionReadonly] = useState([]);
+    const [section, setSection] = useState(1);
   const [selectedmulty, setSelectedmulty] = useState([]);
-
-  const [getUsers, setGetUsers] = useState([]);
-  const [message, setMessage] = useState([]);
-  const [responseMessage, setResponseMessage] = useState([]);
-
-
   const [subject, setSubject] = useState([]);
   const [description, setDescription] = useState([]);
   const [selectOption, setSelectOption] = useState([]);
-  const {  user } = useSelector((state) => state.user);
+  const [selectOptionReadonly, setselectOptionReadonly] = useState([]);
+  const [getUsers, setGetUsers] = useState([]);
 
-  // USE EFFECT FETCHING USERS
-  useEffect(() => {
-    socket.clients((error, clients) => {
-      if (error) throw error;
-      console.log(clients); // => [6em3d4TJP8Et9EMNAAAA, G5p55dHhGgUnLUctAAAB]
-    });
-    socket.on('messageResponse', (data) =>
-    console.log(data,"op")
+
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+console.log(getUsers,"this is getUsers")
+const names = [
+  'Oliver Hansen',
+  'Van Henry',
+  'April Tucker',
+  'Ralph Hubbard',
+  'Omar Alexander',
+  'Carlos Abbott',
+  'Miriam Wagner',
+  'Bradley Wilkerson',
+  'Virginia Andrews',
+  'Kelly Snyder',
+];
+
+function getStyles(name, personName, theme) {
+  return {
+    fontWeight:
+      personName.indexOf(name) === -1
+        ? theme.typography.fontWeightRegular
+        : theme.typography.fontWeightMedium,
+  };
+}
+
+  const theme = useTheme();
+  const [personName, setPersonName] = React.useState([]);
+
+  const handleChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
     );
-    console.log("objectdddd",responseMessage);
-
-
-    const getSelectUsers = async (e) => {
-      console.log(user, 'usssser')
-      try {
-        await axios
-          .get(`${server}/user/getalluser`)
-          .then((res) => {
-            // console.log(res.data.message);
-            // console.log(res.data.users[0]._id);
-            // setGetUsers(res.data.users);
-            // setGetUsers((prev) => [...prev, res.data.users]);
-
-            console.log("this is getusers", getUsers);
-            // console.log("this is getusers", getUsers;
-            // if(res.data.success===true){
-            //             setGetUsers(res.data.users)
-            //           }
-            setGetUsers(res.data.users);
-          })
-
-          .catch((error) => {
-            console.log(error);
-          });
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getSelectUsers();
-  }, []);
-
-  const [selectedcolleagues, setSelectedcolleagues] = useState();
-  const handleChange = (e) => {
-    e.preventDefault();
-  
-    if(e.target.name==="subject"){
-      setSubject(e.target.value)
-    }
-    if(e.target.name==="description"){
-      setDescription(e.target.value)
-    }
-    if(e.target.name==="selected"){
-      setSelectOption(e.target.value)
-    }
-    if(e.target.name==="selectOptionReadonly"){
-      setselectOptionReadonly(e.target.value)
+  };
+  // SET HANDLECHANGE
+  const handleChange2 = (e) => {
+        e.preventDefault();
       
-    }
-    // setMessages([...messages, res.data.message]);
+        if(e.target.name==="subject"){
+          setSubject(e.target.value)
+        }
+        if(e.target.name==="description"){
+          setDescription(e.target.value)
+        }
+        if(e.target.name==="selected"){
+          setSelectOption(e.target.value)
+        }
+        if(e.target.name==="selectOptionReadonly"){
+          setselectOptionReadonly(e.target.value)
+          
+        }
+        // setMessages([...messages, res.data.message]);
+    
+    
+        // setMessage(subject,description,selectOption,selectOptionReadonly)
+    
+      };
 
+      const sendMessageHandler=(e)=>{
+        e.preventDefault()
+      }
 
-    setMessage(subject,description,selectOption,selectOptionReadonly)
+      useEffect(() => {
+          
+            const getSelectUsers = async (e) => {
+              try {
+                await axios
+                  .get(`${server}/user/getalluser`)
+                  .then((res) => {
+                    // console.log(res.data.message);
+                    // console.log(res.data.users[0]._id);
+                    // setGetUsers(res.data.users);
+                    // setGetUsers((prev) => [...prev, res.data.users]);
+        
+                    console.log("this is getusers", getUsers);
+                    // console.log("this is getusers", getUsers;
+                    // if(res.data.success===true){
+                    //             setGetUsers(res.data.users)
+                    //           }
+                    setGetUsers(res.data.users);
+                  })
+        
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              } catch (error) {
+                console.log(error);
+              }
+            };
+            getSelectUsers();
+          }, []);
 
-  };
-
-  const sendMessageHandler = async (e) => {
-    e.preventDefault();
-    if(subject===""||description==="" ||selectOption==="")
-    socket.emit("message", {
-      text: subject,
-      description:description,
-      senderId:user._id,
-      receiver:selectOption,
-      id: `${socket.id}${Math.random()}`,
-      socketID: socket.id,
-    })
-      setSubject('')
-      setDescription('')
-      setSelectOption('')
-
-   
-    // const message = {
-    //   sender: user._id,
-    //   text: newMessage,
-    //   conversationId: currentChat._id,
-    // };
-    // const receiverId = currentChat.members.find(
-    //   (member) => member !== user?._id
-    // );
-
-    // socketId.emit("sendMessage", {
-    //   senderId: user?._id,
-    //   receiverId,
-    //   text: newMessage,
-    // });
-  };
 
   return (
     <div className="w-full flex ">
-      <div className="w-1/6 bg-yellow-500 ">
-        <div className="flex w-full m-auto justify-center  ">
-          <ul className="w-full flex gap-6 flex-col mt-5 " >
-            <li onClick={(e)=>{e.preventDefault()
-    setSection(1)
-}} className="w-full hover:bg-red-400 p-5">ليست چت ها</li>
-            <li onClick={(e)=>{e.preventDefault()
-    setSection(2)
-}} className="w-full hover:bg-red-400 p-5">ارسال درخواست</li>
-          </ul>
-        </div>
-      </div>
-      
-     {section===1&& <div className=" w-5/6 bg-cyan-100 flex items-center justify-center ">
-        <form>
-          <div className="flex  max-w-lg flex-col gap-4 mt-4">
-            <label htmlFor="subject">موضوع</label>
-
-            <input value={subject} onChange={handleChange} type="text" name="subject" />
-            <label htmlFor="message"></label>
-            <textarea value={description}  onChange={handleChange} name="description" id="" cols="30" rows="10"></textarea>
-
-            <label htmlFor="colleagues"></label>
+          <div className="w-1/6 bg-yellow-500 ">
+            <div className="flex w-full m-auto justify-center  ">
+              <ul className="w-full flex gap-6 flex-col mt-5 " >
+                <li onClick={(e)=>{e.preventDefault()
+        setSection(1)
+    }} className="w-full hover:bg-red-400 p-5">ليست چت ها</li>
+                <li onClick={(e)=>{e.preventDefault()
+        setSection(2)
+    }} className="w-full hover:bg-red-400 p-5">ارسال درخواست</li>
+              </ul>
+            </div>
           </div>
-          <div className="flex flex-col  gap-5">
-            {selectedmulty &&
-            selectedmulty.map((i,index)=>(
-              <span>
-                {i.email}
-              </span>
-            ))}
-            {/* SELECT RAW */}
-            <select  value={selectOption}   onChange={handleChange} className="w-max" name="selected" id="">
-              {getUsers &&
-                getUsers.map((i, index) => (
-                  <option className="optionS" >
+          
+     <div className=" w-5/6 bg-cyan-100 flex items-center justify-center ">
+            <form>
+              <div className="flex  max-w-lg flex-col gap-4 mt-4">
+                <label htmlFor="subject">موضوع</label>
+    
+                <input value={subject} onChange={handleChange2} type="text" name="subject" />
+                <label htmlFor="message"></label>
+                <textarea value={description}  onChange={handleChange2} name="description" id="" cols="30" rows="10"></textarea>
+    
+                <label htmlFor="colleagues"></label>
+              </div>
+              <div className="flex flex-col  gap-5">
+                {selectedmulty &&
+                selectedmulty.map((i,index)=>(
+                  <span>
                     {i.email}
-                  </option>
+                  </span>
                 ))}
-            </select>
-            {/* READ ONLY SELECT */}
-            <select  value={selectOptionReadonly}   onChange={handleChange} className="w-max" name="selectOptionReadonly" id="">
-              {getUsers &&
-                getUsers.map((i, index) => (
-                  <option className="optionS" >
-                    {i.email}
-                  </option>
-                ))}
-            </select>
-            <button
-              onClick={sendMessageHandler}
-              className=" text-white flex items-center justify-center  p-0.5 pl-3 pr-3 mt-5 hover:bg-blue-500 bg-blue-900 w-fit "
+                
+              {/* MUI SELECTION */}
+
+                <FormControl sx={{ m: 1, width: 300 }}>
+        <InputLabel id="demo-multiple-chip-label">Chip</InputLabel>
+        <Select
+          labelId="demo-multiple-chip-label"
+          id="demo-multiple-chip"
+          multiple
+          value={personName}
+          onChange={handleChange}
+          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+          renderValue={(selected) => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {selected.map((value) => (
+                <Chip key={value} label={value} />
+              ))}
+            </Box>
+          )} 
+          MenuProps={MenuProps}
+        >
+          {getUsers.map((name) => (
+            <MenuItem
+              key={name._id}
+              value={name}
+              style={getStyles(name, personName, theme)}
             >
-              <span>ارسال</span>
-            </button>
+              {name.email}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+                {/* SELECT RAW */}
+                {/* <select  value={selectOption}   onChange={handleChange} className="w-max" name="selected" id="">
+                  {getUsers &&
+                    getUsers.map((i, index) => (
+                      <option className="optionS" >
+                        {i.email}
+                      </option>
+                    ))}
+                </select> */}
+                {/* READ ONLY SELECT */}
+                {/* <select  value={selectOptionReadonly}   onChange={handleChange} className="w-max" name="selectOptionReadonly" id="">
+                  {getUsers &&
+                    getUsers.map((i, index) => (
+                      <option className="optionS" >
+                        {i.email}
+                      </option>
+                    ))}
+                </select> */}
+
+                <button
+                  onClick={sendMessageHandler}
+                  className=" text-white flex items-center justify-center  p-0.5 pl-3 pr-3 mt-5 hover:bg-blue-500 bg-blue-900 w-fit "
+                >
+                  <span>ارسال</span>
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
-      }
-      {section===2&& <div className=" w-5/6 bg-cyan-100 flex items-center justify-center ">
         
-      </div>
-      }
-    </div>
-  );
+          {section===2&& <div className=" w-5/6 bg-cyan-100 flex items-center justify-center ">
+            
+          </div>
+          }
+        </div>
+  )
 }
 
-export default ChatPage;
+export default ChatPage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useSelector } from "react-redux";
+// import socketIO from "socket.io-client";
+// import { format } from "timeago.js";
+// import { server } from "../server";
+// import axios from "axios";
+// import { useNavigate } from "react-router-dom";
+// import React, { useState, useEffect } from "react";
+
+// function ChatPage() {
+//   const ENDPOINT = "http://localhost:4000";
+//   const socket = socketIO.connect("http://localhost:4000");
+//   const [section, setSection] = useState(1);
+  
+//   const [selectOptionReadonly, setselectOptionReadonly] = useState([]);
+//   const [selectedmulty, setSelectedmulty] = useState([]);
+
+//   const [getUsers, setGetUsers] = useState([]);
+//   const [message, setMessage] = useState([]);
+//   const [responseMessage, setResponseMessage] = useState([]);
+
+
+//   const [subject, setSubject] = useState([]);
+//   const [description, setDescription] = useState([]);
+//   const [selectOption, setSelectOption] = useState([]);
+//   const {  user } = useSelector((state) => state.user);
+
+//   // USE EFFECT FETCHING USERS
+//   useEffect(() => {
+//     socket.clients((error, clients) => {
+//       if (error) throw error;
+//       console.log(clients); // => [6em3d4TJP8Et9EMNAAAA, G5p55dHhGgUnLUctAAAB]
+//     });
+//     socket.on('messageResponse', (data) =>
+//     console.log(data,"op")
+//     );
+//     console.log("objectdddd",responseMessage);
+
+
+//     const getSelectUsers = async (e) => {
+//       console.log(user, 'usssser')
+//       try {
+//         await axios
+//           .get(`${server}/user/getalluser`)
+//           .then((res) => {
+//             // console.log(res.data.message);
+//             // console.log(res.data.users[0]._id);
+//             // setGetUsers(res.data.users);
+//             // setGetUsers((prev) => [...prev, res.data.users]);
+
+//             console.log("this is getusers", getUsers);
+//             // console.log("this is getusers", getUsers;
+//             // if(res.data.success===true){
+//             //             setGetUsers(res.data.users)
+//             //           }
+//             setGetUsers(res.data.users);
+//           })
+
+//           .catch((error) => {
+//             console.log(error);
+//           });
+//       } catch (error) {
+//         console.log(error);
+//       }
+//     };
+//     getSelectUsers();
+//   }, []);
+
+//   const [selectedcolleagues, setSelectedcolleagues] = useState();
+//   const handleChange = (e) => {
+//     e.preventDefault();
+  
+//     if(e.target.name==="subject"){
+//       setSubject(e.target.value)
+//     }
+//     if(e.target.name==="description"){
+//       setDescription(e.target.value)
+//     }
+//     if(e.target.name==="selected"){
+//       setSelectOption(e.target.value)
+//     }
+//     if(e.target.name==="selectOptionReadonly"){
+//       setselectOptionReadonly(e.target.value)
+      
+//     }
+//     // setMessages([...messages, res.data.message]);
+
+
+//     setMessage(subject,description,selectOption,selectOptionReadonly)
+
+//   };
+
+//   const sendMessageHandler = async (e) => {
+//     e.preventDefault();
+//     if(subject===""||description==="" ||selectOption==="")
+//     socket.emit("message", {
+//       text: subject,
+//       description:description,
+//       senderId:user._id,
+//       receiver:selectOption,
+//       id: `${socket.id}${Math.random()}`,
+//       socketID: socket.id,
+//     })
+//       setSubject('')
+//       setDescription('')
+//       setSelectOption('')
+
+   
+//     // const message = {
+//     //   sender: user._id,
+//     //   text: newMessage,
+//     //   conversationId: currentChat._id,
+//     // };
+//     // const receiverId = currentChat.members.find(
+//     //   (member) => member !== user?._id
+//     // );
+
+//     // socketId.emit("sendMessage", {
+//     //   senderId: user?._id,
+//     //   receiverId,
+//     //   text: newMessage,
+//     // });
+//   };
+
+//   return (
+//     <div className="w-full flex ">
+//       <div className="w-1/6 bg-yellow-500 ">
+//         <div className="flex w-full m-auto justify-center  ">
+//           <ul className="w-full flex gap-6 flex-col mt-5 " >
+//             <li onClick={(e)=>{e.preventDefault()
+//     setSection(1)
+// }} className="w-full hover:bg-red-400 p-5">ليست چت ها</li>
+//             <li onClick={(e)=>{e.preventDefault()
+//     setSection(2)
+// }} className="w-full hover:bg-red-400 p-5">ارسال درخواست</li>
+//           </ul>
+//         </div>
+//       </div>
+      
+//      {section===1&& <div className=" w-5/6 bg-cyan-100 flex items-center justify-center ">
+//         <form>
+//           <div className="flex  max-w-lg flex-col gap-4 mt-4">
+//             <label htmlFor="subject">موضوع</label>
+
+//             <input value={subject} onChange={handleChange} type="text" name="subject" />
+//             <label htmlFor="message"></label>
+//             <textarea value={description}  onChange={handleChange} name="description" id="" cols="30" rows="10"></textarea>
+
+//             <label htmlFor="colleagues"></label>
+//           </div>
+//           <div className="flex flex-col  gap-5">
+//             {selectedmulty &&
+//             selectedmulty.map((i,index)=>(
+//               <span>
+//                 {i.email}
+//               </span>
+//             ))}
+//             {/* SELECT RAW */}
+//             <select  value={selectOption}   onChange={handleChange} className="w-max" name="selected" id="">
+//               {getUsers &&
+//                 getUsers.map((i, index) => (
+//                   <option className="optionS" >
+//                     {i.email}
+//                   </option>
+//                 ))}
+//             </select>
+//             {/* READ ONLY SELECT */}
+//             <select  value={selectOptionReadonly}   onChange={handleChange} className="w-max" name="selectOptionReadonly" id="">
+//               {getUsers &&
+//                 getUsers.map((i, index) => (
+//                   <option className="optionS" >
+//                     {i.email}
+//                   </option>
+//                 ))}
+//             </select>
+//             <button
+//               onClick={sendMessageHandler}
+//               className=" text-white flex items-center justify-center  p-0.5 pl-3 pr-3 mt-5 hover:bg-blue-500 bg-blue-900 w-fit "
+//             >
+//               <span>ارسال</span>
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+//       }
+//       {section===2&& <div className=" w-5/6 bg-cyan-100 flex items-center justify-center ">
+        
+//       </div>
+//       }
+//     </div>
+//   );
+// }
+
+// export default ChatPage;
 
 // import React, { useEffect, useRef, useState } from "react";
 //import { useSelector } from "react-redux";

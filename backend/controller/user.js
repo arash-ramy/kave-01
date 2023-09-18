@@ -1,5 +1,7 @@
 const express = require("express");
 const User = require("../model/user");
+const Sidebar = require("../model/sidebar");
+
 const router = express.Router();
 const ErrorHandler = require("../utils/ErrorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
@@ -322,6 +324,37 @@ router.get(
         message:"fetching data successfullky",
         users:users
       })
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+
+router.post(
+  "/createsidebar",
+  catchAsyncErrors(async (req, res, next) => {
+    const {row,floor,caption}=req.body
+
+if(!row || !floor || !caption){
+  return res.status(400).json({
+    "message":"please inter inputs"
+  }) 
+}
+    try {
+      
+   const sidebody={
+     row,floor,caption
+    }
+    const sidebar = await Sidebar.create({
+      row,
+      floor,
+      caption,
+    });
+   
+   return res.status(201).json({
+      "message":"successfuly"
+    })    
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }

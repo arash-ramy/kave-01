@@ -1,0 +1,15 @@
+/* SIDEBAR */
+.sideBar{
+    background-color: #212529;
+flex:15%;
+position: relative;
+}
+.sideBarAB{
+position: absolute;
+right: 0;
+}
+.SidebarAction{
+display: flex;
+flex-direction: column;
+gap: 30px;
+}

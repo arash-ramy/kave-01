@@ -8,6 +8,7 @@ import {
   ChatPage,
 } from "./routes/Routes.js";
 
+
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Store from "./redux/store";
@@ -20,6 +21,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 // import { loadStripe } from "@stripe/stripe-js";
 import Dashboard from "./pages/Dashboard";
 import UserInbox from "./pages/UserInbox";
+import Home from "./pages/Home/index"
 // import ChatPage from "./pages/chatPage/chatPage";
 
 const App = () => {
@@ -43,6 +45,14 @@ const App = () => {
 
         <Route
           path="/"
+          element={
+            <ProtectedRoute>
+              <Home  />{" "}
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/chat"
           element={
             <ProtectedRoute>
               <ChatPage  />{" "}
