@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 
-const userSchema = new mongoose.Schema({
+const sidebarSchema = new mongoose.Schema({
  
 
 
@@ -30,4 +30,4 @@ const userSchema = new mongoose.Schema({
 
 });
 
-module.exports = mongoose.model("Sidebar", userSchema);
+module.exports = mongoose.model("Sidebar", sidebarSchema);

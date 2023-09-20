@@ -27,7 +27,7 @@ import Home from "./pages/Home/index"
 const App = () => {
   const [user, setUser] = useState();
   useEffect(() => {
-    console.log(user, "this is user in app.js");
+    // console.log(user, "this is user in app.js");
     Store.dispatch(loadUser());
 
     setUser(Store.dispatch(loadUser()));

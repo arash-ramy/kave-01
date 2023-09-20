@@ -334,14 +334,57 @@ router.get(
 router.post(
   "/createsidebar",
   catchAsyncErrors(async (req, res, next) => {
-    const {row,floor,caption}=req.body
-
-if(!row || !floor || !caption){
-  return res.status(400).json({
-    "message":"please inter inputs"
-  }) 
-}
     try {
+      const {row,floor,caption}=req.body
+      console.log(req.body)
+  if(!row || !floor || !caption){
+    return res.status(400).json({
+      "message":"please inter inputs"
+    }) 
+  }
+  const findLike =await Sidebar.findOne({row});
+
+  if(findLike){
+    console.log("are")
+
+
+
+    const side = await Sidebar.find({}).select(['-caption',"-childred","-_id","-__v"]).where("row")
+    .gt(req.body.row-1).where("floor").equals(req.body.floor).sort({ row: 1 })
+
+      console.log(side,"355")
+      // side.updateMany(row,{side});
+      
+      // .where("floor").equals(req.body.floor)
+    console.log(side,"357")
+    // console.log(side.length)
+
+      let b=0;
+    for(b;b<side.length;b++){
+      console.log(side[b].row)
+      console.log(typeof(side[b].row.toString()))
+      const ioio=side[b].row;
+      const ss = await Sidebar.findOneAndUpdate( {row : ioio},{
+            row: parseInt(side[b].row)+1,
+           
+         });
+
+    }
+    
+
+
+
+
+
+  }
+  if(findLike){
+    console.log("na")
+  }
+
+
+
+
+
       
    const sidebody={
      row,floor,caption
@@ -354,6 +397,181 @@ if(!row || !floor || !caption){
    
    return res.status(201).json({
       "message":"successfuly"
+    })    
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+
+
+
+
+// router.get(
+//   "/getsidebar",
+//   catchAsyncErrors(async (req, res, next) => {
+   
+//     try {
+//     const sidebar =await Sidebar.find({});
+//       console.log("this is sidebar iiiiiii" ,sidebar)
+   
+//    return res.status(201).json({
+//       "message":"successfuly",
+//       sidebar:sidebar
+//     })    
+//     } catch (error) {
+//       return next(new ErrorHandler(error.message, 500));
+//     }
+//   })
+// );
+router.get(
+  "/getsidebar",
+  catchAsyncErrors(async (req, res, next) => {
+   
+    try {
+    const sidebar =await Sidebar.find({}).sort({ row: 1 });
+      console.log("this is sidebar iiiiiii" ,sidebar)
+   
+   return res.status(201).json({
+      "message":"successfuly",
+      sidebar:sidebar
+    })    
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+router.post(
+  "/getsinglesidebar",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      console.log("req.body" ,req.body)
+      const caption = req.body.data
+
+    const sidebar =await Sidebar.findOne({caption});
+    //   console.log("this is sidebar iiiiiii" ,sidebar)
+   
+   return res.status(201).json({
+      "message":"successfuly",
+      sidebar:sidebar
+    })    
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+// Device.find(function(err, devices) {
+//   devices.forEach(function(device) {
+//     device.cid = '';
+//     device.save();
+//   });
+// });
+
+router.get(
+  "/getsidebaroo",
+  catchAsyncErrors(async (req, res, next) => {
+   
+    try {
+
+// let oo= 4;
+
+//       let side = await Sidebar.findByIdAndUpdate({}).select(['-caption',"-childred","-floor","-_id","-__v"]).where("row").gt(4).sort({ row: 1 }).then((res)=>{
+//         res.map((i)=>{
+//           const p  =  parseInt(i.row)
+//         let w= p+1;
+//         console.log("this is "+i.row)
+//         console.log(w)
+//           // console.log(p)
+//           // return  p
+//         })
+//         // side.updateMany(row,{side});
+
+//       })
+//       console.log(side)
+
+
+
+
+
+
+
+
+
+      // let side = await Sidebar.find() .select(['-caption',"-childred","-floor","-_id","-__v"]).sort({ row: 1 })
+      // console.log(side)
+      // let side2 = await Sidebar.find() .select(['-caption',"-childred","-floor","-row","-__v"]).sort({ row: 1 })
+      // let numberInput=4;
+      // side.map((e)=>{
+      // if(numberInput<e.row){
+      //   console.log(e.row)
+      //   // const user = await User.find({ row: e.row })
+      //   // .where("_id")
+      //   // .equals(resetCode);      }
+
+
+      // }})
+
+    //  const an= await Sidebar.find()
+    //   .then((result)=>{
+    //     (result.map((e)=>{
+    //       // console.log("start",e.row)
+    //       const dd= parseInt(e.row) + 1;
+    //       const id = e._id;
+    //       e.row=+1
+
+          // console.log(id)
+          // Sidebar.findByIdAndUpdate("6509342cee427043a7c120ad",{row:'12'})
+        // console.log(dd)
+   
+          // const finds= Sidebar.findById(myid)
+        //  console.log(finds)
+        //  const ii= Sidebar.findByIdAndUpdate("6509342cee427043a7c120ad",{row:11})
+        //  console.log(ii)
+      //   }))
+
+      // })
+    
+    //   .catch((error)=>{
+    //     console.log(error)
+    // })
+
+    
+    let oo= 4;
+
+    const side = await Sidebar.find({}).select(['-caption',"-childred","-floor","-_id","-__v"]).where("row").gt(4).sort({ row: 1 })
+      // console.log(object)
+      // side.updateMany(row,{side});
+      
+    
+    // console.log(side)
+    // console.log(side.length)
+
+      let b=0;
+    for(b;b<side.length;b++){
+      console.log(side[b].row)
+      console.log(typeof(side[b].row.toString()))
+      const ioio=side[b].row;
+      const ss = await Sidebar.findOneAndUpdate( {row : ioio},{
+            row: parseInt(side[b].row)+1,
+         });
+         }
+
+         
+  //   const user = await User.findByIdAndUpdate( id ,{
+  //     name: search,
+  //      exprience: exprience,
+  //      genre: selecetedHobby,
+  //      age: age,
+  //  });
+
+
+
+   return res.status(201).json({
+      "message":"successfuly",
+      sidebar:side,
+      // sideba2r:side2
+
     })    
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));

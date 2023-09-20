@@ -1,15 +1,36 @@
 /* SIDEBAR */
-.sideBar{
-    background-color: #212529;
-flex:15%;
-position: relative;
+.sideBar {
+  background-color: #212529;
+  flex: 15%;
+  position: relative;
 }
-.sideBarAB{
-position: absolute;
-right: 0;
+.sideBarAB {
+  text-align: right;
+  position: absolute;
+  right: 0;
+  color: white;
+  width: 100%;
+
 }
-.SidebarAction{
+.sideBarAB .ul{
 display: flex;
 flex-direction: column;
-gap: 30px;
+}
+.sideBarAB .ul .lii{
+    position: relative;
+    /* background: red; */
+    width: 100%;
+    cursor: pointer;
+
+    }
+
+    .sideBarAB ul .lii:hover{
+        background: rgb(223, 189, 0);
+        color: rgb(70, 70, 70);
+      
+        }
+.SidebarAction {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
