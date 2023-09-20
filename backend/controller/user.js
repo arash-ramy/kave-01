@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../model/user");
 const Sidebar = require("../model/sidebar");
+const mongoose = require("mongoose");
 
 const router = express.Router();
 const ErrorHandler = require("../utils/ErrorHandler");
@@ -405,7 +406,31 @@ router.post(
 );
 
 
+router.post(
+  "/createsidebarchild",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      // const {}= req.body;
+   console.log(req.body)
 
+
+  // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
+  const sideupdate= await Sidebar.updateOne(
+    {
+      "caption": req.body.parent,"row":req.body.subnav
+    },
+    { $set: { "children": {"caption": req.body.caption,"row":req.body.subnav,"floor":2 , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"} } }
+  );
+
+   return res.status(201).json({
+    "message":"successfuly",
+    "data":Sidebar
+  })  
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
 
 
 // router.get(

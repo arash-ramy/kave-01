@@ -6,9 +6,7 @@ const sidebarSchema = new mongoose.Schema({
 
 
 
-  parentId:{
-    type: String,
-  },
+   
   floor:{
       type:String
   },
@@ -22,9 +20,15 @@ const sidebarSchema = new mongoose.Schema({
       type:String
   },
   
-  childred:{
-      type:Array
-  },
+  children:  [{
+    _id:{type: mongoose.Schema.Types.ObjectId,},
+
+    parentId:String,
+
+    caption: String,
+    floor:Number,
+    row:Number,
+}],
 
 
 

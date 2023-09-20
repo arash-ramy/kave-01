@@ -18,6 +18,10 @@ text-align: right;
     justify-content: center;
     color: orangered;
 }
+.hsfkhslfkj{
+    font-size: 2rem !important;
+    color: white;
+}
 .ifwasone{
     display: flex;
     flex-direction: column;
@@ -43,4 +47,9 @@ text-align: right;
 .sdfjkfds{
     display: flex;
     gap: 50px;
+}
+.hdskljfhsdfkl{
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
 }
