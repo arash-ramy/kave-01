@@ -23,11 +23,11 @@ const sidebarSchema = new mongoose.Schema({
   children:  [{
     _id:{type: mongoose.Schema.Types.ObjectId,},
 
-    parentId:String,
+    parentId:{type: mongoose.Schema.Types.ObjectId, ref: 'Sidebar'},
 
     caption: String,
-    floor:Number,
-    row:Number,
+    floor:String,
+    row:String,
 }],
 
 

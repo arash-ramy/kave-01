@@ -405,32 +405,128 @@ router.post(
   })
 );
 
+// UPDATE NAV CHILD
+
+
 
 router.post(
-  "/createsidebarchild",
+  "/updatenavchild",
   catchAsyncErrors(async (req, res, next) => {
     try {
       // const {}= req.body;
-   console.log(req.body)
+   const{caption,subnavrow,parent,parentrow }=req.body
+// const captionbody= req.body.caption;
+console.log(parentrow,"sii")
 
+    const founded = await Sidebar.findOne({ "caption":parent});
 
+    if(founded){
+      // console.log(founded,"sii")
+    }
   // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
   const sideupdate= await Sidebar.updateOne(
     {
-      "caption": req.body.parent,"row":req.body.subnav
+      $and :[{"caption": parent} ,{"row":parentrow}]
     },
-    { $set: { "children": {"caption": req.body.caption,"row":req.body.subnav,"floor":2 , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"} } }
+    { $set: { "children": {"caption": req.body.caption,"row":subnavrow,"floor":"2","_id" :new mongoose.Types.ObjectId(),"parentId":founded._id
+    // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
+  } 
+  } }
   );
 
    return res.status(201).json({
     "message":"successfuly",
-    "data":Sidebar
+    "data":sideupdate,
+    "successfully process":sideupdate.modifiedCount
   })  
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
+
+//CREATE NAV CHILD 
+
+
+
+
+router.post(
+  "/createnavchild",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      // const {}= req.body;
+   const{caption,subnavrow,parent,parentrow }=req.body
+// const captionbody= req.body.caption;
+console.log(parentrow,"sii")
+
+    const founded = await Sidebar.findOne({ "caption":parent});
+
+    if(founded){
+      // console.log(founded,"sii")
+    }
+  // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
+  const sideupdate= await Sidebar.updateOne(
+    {
+      $and :[{"caption": parent} ,{"row":parentrow}]
+    },
+    { $push: { "children": {"caption": req.body.caption,"row":subnavrow,"floor":"2","_id" :new mongoose.Types.ObjectId(),"parentId":founded._id
+    // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
+  } 
+  } }
+  );
+
+   return res.status(201).json({
+    "message":"successfuly",
+    "data":sideupdate,
+    "successfully process":sideupdate.modifiedCount
+  })  
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+
+
+// DELETE NAV CHILD 
+
+
+router.post(
+  "/deletenavchild",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      // const {}= req.body;
+   const{caption,subnavrow,parent,parentrow }=req.body
+// const captionbody= req.body.caption;
+console.log(parentrow,"sii")
+
+    const founded = await Sidebar.findOne({ "caption":parent});
+
+    if(founded){
+      // console.log(founded,"sii")
+    }
+  // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
+  const sideupdate= await Sidebar.updateOne(
+    {
+      $and :[{"caption": parent} ,{"row":parentrow}]
+    },
+    { $remove: { "children": {"caption": req.body.caption,"row":subnavrow,"floor":"2"
+    // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
+  } 
+  } }
+  );
+
+   return res.status(201).json({
+    "message":"successfuly",
+    "data":sideupdate,
+    "successfully process":sideupdate.modifiedCount
+  })  
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 
 
 // router.get(
@@ -498,7 +594,30 @@ router.get(
   catchAsyncErrors(async (req, res, next) => {
    
     try {
+      let oo= 4;
 
+      const side = await Sidebar.find({}).select(['-caption',"-childred","-floor","-_id","-__v"]).where("row").gt(4).sort({ row: 1 })
+      
+      let b=0;
+      for(b;b<side.length;b++){
+        console.log(side[b].row)
+        console.log(typeof(side[b].row.toString()))
+        const ioio=side[b].row;
+        const ss = await Sidebar.findOneAndUpdate( {row : ioio},{
+              row: parseInt(side[b].row)+1,
+           });
+           }
+           return res.status(201).json({
+            "message":"successfuly",
+            sidebar:side,
+            // sideba2r:side2
+      
+          })    
+          } catch (error) {
+            return next(new ErrorHandler(error.message, 500));
+          }
+        })
+      );
 // let oo= 4;
 
 //       let side = await Sidebar.findByIdAndUpdate({}).select(['-caption',"-childred","-floor","-_id","-__v"]).where("row").gt(4).sort({ row: 1 }).then((res)=>{
@@ -514,14 +633,6 @@ router.get(
 
 //       })
 //       console.log(side)
-
-
-
-
-
-
-
-
 
       // let side = await Sidebar.find() .select(['-caption',"-childred","-floor","-_id","-__v"]).sort({ row: 1 })
       // console.log(side)
@@ -562,25 +673,13 @@ router.get(
     // })
 
     
-    let oo= 4;
-
-    const side = await Sidebar.find({}).select(['-caption',"-childred","-floor","-_id","-__v"]).where("row").gt(4).sort({ row: 1 })
-      // console.log(object)
+    
+    // console.log(object)
       // side.updateMany(row,{side});
       
     
     // console.log(side)
     // console.log(side.length)
-
-      let b=0;
-    for(b;b<side.length;b++){
-      console.log(side[b].row)
-      console.log(typeof(side[b].row.toString()))
-      const ioio=side[b].row;
-      const ss = await Sidebar.findOneAndUpdate( {row : ioio},{
-            row: parseInt(side[b].row)+1,
-         });
-         }
 
          
   //   const user = await User.findByIdAndUpdate( id ,{
@@ -592,17 +691,7 @@ router.get(
 
 
 
-   return res.status(201).json({
-      "message":"successfuly",
-      sidebar:side,
-      // sideba2r:side2
 
-    })    
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
-);
 // // update user info
 // router.put(
 //   "/update-user-info",
