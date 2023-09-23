@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
 const sendToken = require("../utils/jwtToken");
 const { isAuthenticated } = require("../middleware/auth");
+const { where } = require("../model/user");
 
 // create user
 router.post("/create-user", async (req, res, next) => {
@@ -322,83 +323,128 @@ router.get(
 
       res.status(201).json({
         success: true,
-        message:"fetching data successfullky",
-        users:users
-      })
+        message: "fetching data successfullky",
+        users: users,
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
 
-
 router.post(
   "/createsidebar",
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const {row,floor,caption}=req.body
-      console.log(req.body)
-  if(!row || !floor || !caption){
-    return res.status(400).json({
-      "message":"please inter inputs"
-    }) 
-  }
-  const findLike =await Sidebar.findOne({row});
+      const { row, floor, caption } = req.body;
+      console.log(req.body,"sdjfojsdfo");
+      if (!row || !floor || !caption) {
+        return res.status(400).json({
+          message: "please inter inputs",
+        });
+      }
+      const captionduplicate = await Sidebar.findOne({ caption });
+      if (captionduplicate) {
+        const findLike = await Sidebar.findOne({ row });
+        console.log(findLike, "222:");
+        findLike.row=+1;
+        if (findLike) {
+          const side = await Sidebar.find({})
+            .select(["-caption", "-childred", "-_id", "-__v"])
+            .where("row")
+            .gt(req.body.row - 1)
+            .where("floor")
+            .equals(req.body.floor)
+            .sort({ row: 1 });
 
-  if(findLike){
-    console.log("are")
+          console.log(side, "355");
+          // side.updateMany(row,{side});
 
+          // .where("floor").equals(req.body.floor)
+          console.log(side, "357");
+          // console.log(side.length)
 
+          let b = 0;
+          for (b; b < side.length; b++) {
+            console.log(side[b].row);
+            console.log(typeof side[b].row.toString());
+            const ioio = side[b].row;
+            const ss = await Sidebar.findOneAndUpdate(
+              { row: ioio },
+              {
+                row: parseInt(side[b].row) + 1,
+              }
+            );
+          }
+        }
+      }
 
-    const side = await Sidebar.find({}).select(['-caption',"-childred","-_id","-__v"]).where("row")
-    .gt(req.body.row-1).where("floor").equals(req.body.floor).sort({ row: 1 })
+      // if (findLike) {
+      //   console.log("na");
+      // }
 
-      console.log(side,"355")
-      // side.updateMany(row,{side});
-      
-      // .where("floor").equals(req.body.floor)
-    console.log(side,"357")
-    // console.log(side.length)
+      const sidebody = {
+        row,
+        floor,
+        caption,
+      };
+      const sidebar = await Sidebar.create({
+        row,
+        floor,
+        caption,
+      });
 
-      let b=0;
-    for(b;b<side.length;b++){
-      console.log(side[b].row)
-      console.log(typeof(side[b].row.toString()))
-      const ioio=side[b].row;
-      const ss = await Sidebar.findOneAndUpdate( {row : ioio},{
-            row: parseInt(side[b].row)+1,
-           
-         });
-
+      return res.status(201).json({
+        message: "successfuly",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
     }
-    
+  })
+);
+
+// UPDATE PAERNT SIDEBAR
+router.post(
+  "/updatesidbar",
+  catchAsyncErrors(async (req, res, next) => {
 
 
+    try {
+      const { row , caption ,newrow ,newcaption } = req.body;
+      console.log(req.body,"sdjfojsdfo");
+      if (!row ||   !caption  || !newcaption  || !newrow) {
+        return res.status(400).json({
+          message: "please inter inputs",
+        });
+      }
+      const captionduplicate = await Sidebar.findOne({ caption });
+     
+      console.log(captionduplicate,"dsfjjshfkj")
 
+      captionduplicate.caption=newcaption;
+      captionduplicate.row=newrow;
+      await captionduplicate.save()
 
+      // if (findLike) {
+      //   console.log("na");
+      // }
 
-  }
-  if(findLike){
-    console.log("na")
-  }
+      // const sidebody = {
+      //   row,
+      //   caption,
+      // };
+      // const sidebar = await Sidebar.create({
+      //   row,
+      //   floor,
+      //   caption,
+      // });
 
-
-
+      return res.status(201).json({
+        message: "successfuly",
+      });
 
 
       
-   const sidebody={
-     row,floor,caption
-    }
-    const sidebar = await Sidebar.create({
-      row,
-      floor,
-      caption,
-    });
-   
-   return res.status(201).json({
-      "message":"successfuly"
-    })    
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -409,138 +455,194 @@ router.post(
 
 
 
+
+
+
+
+
+
 router.post(
   "/updatenavchild",
   catchAsyncErrors(async (req, res, next) => {
     try {
       // const {}= req.body;
-   const{caption,subnavrow,parent,parentrow }=req.body
-// const captionbody= req.body.caption;
-console.log(parentrow,"sii")
+      const { caption, subnavrow, parentCaption, parentRow } = req.body;
+      // const captionbody= req.body.caption;
+      // console.log(parentrow, "sii");
 
-    const founded = await Sidebar.findOne({ "caption":parent});
+      const founded = await Sidebar.findOne(
+        { caption: parentCaption },
+        { "children.row": subnavrow },
+        { parentrow: parentRow }
+      )
+        .where("children.caption")
+        .equals(caption);
+      if (founded) {
+        console.log(founded.children, "siooooooooooooooooooi");
+        if (founded.children.length === 0) {
+          return next(new ErrorHandler("not founded", 400));
+        }
+        //  const createchild=  founded.children.set(founded.children.row,{"caption":caption, row: subnavrow,
+        //  _id: new mongoose.Types.ObjectId(),
+        //  parentId: founded._id,
+        //  floor:2
+        //         })
+      }
+      // founded.save()
+      // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
+      console.log(founded);
 
-    if(founded){
-      // console.log(founded,"sii")
-    }
-  // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
-  const sideupdate= await Sidebar.updateOne(
-    {
-      $and :[{"caption": parent} ,{"row":parentrow}]
-    },
-    { $set: { "children": {"caption": req.body.caption,"row":subnavrow,"floor":"2","_id" :new mongoose.Types.ObjectId(),"parentId":founded._id
-    // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
-  } 
-  } }
-  );
+      // const sideupdate = await Sidebar.updateOne(
+      //   {
+      //     $and: [
+      //       { "children.row": subnavrow },
+      //       { caption: parent },
+      //       { row: parentrow },
+      //     ],
+      //   },
 
-   return res.status(201).json({
-    "message":"successfuly",
-    "data":sideupdate,
-    "successfully process":sideupdate.modifiedCount
-  })  
+      //   {
+      //     $set: {
+      //      "children" : {
+      //         caption: req.body.caption,
+      //         row: subnavrow,
+      //         floor: "2",
+      //         _id: new mongoose.Types.ObjectId(),
+      //         parentId: founded._id,
+      //         // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
+      //       },
+      //     },
+      //   },
+      // );
+
+      return res.status(201).json({
+        message: "successfuly",
+        data: founded,
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
 
-//CREATE NAV CHILD 
-
-
-
+//CREATE NAV CHILD
 
 router.post(
   "/createnavchild",
   catchAsyncErrors(async (req, res, next) => {
     try {
       // const {}= req.body;
-   const{caption,subnavrow,parent,parentrow }=req.body
-// const captionbody= req.body.caption;
-console.log(parentrow,"sii")
+      const { caption, subnavrow, parentCaption, parentrow } = req.body;
+      // const captionbody= req.body.caption;
+      console.log(parentrow, "sii");
 
-    const founded = await Sidebar.findOne({ "caption":parent});
+      const founded = await Sidebar.findOne({ caption: parentCaption,row:parentrow });
 
-    if(founded){
-      // console.log(founded,"sii")
-    }
-  // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
-  const sideupdate= await Sidebar.updateOne(
-    {
-      $and :[{"caption": parent} ,{"row":parentrow}]
-    },
-    { $push: { "children": {"caption": req.body.caption,"row":subnavrow,"floor":"2","_id" :new mongoose.Types.ObjectId(),"parentId":founded._id
-    // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
-  } 
-  } }
-  );
+      if (!founded) {
+        console.log("not founded")
+        return res.status(400).json({
+          message: "please inter inputs",
+        });      }
+      // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
+      const sideupdate = await Sidebar.updateOne(
+        {
+          $and: [{ caption: parentCaption }, { row: parentrow }],
+        },
+        {
+          $push: {
+            children: {
+              caption: req.body.caption,
+              row: subnavrow,
+              floor: "2",
+              _id: new mongoose.Types.ObjectId(),
+              parentId: founded._id,
+              // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
+            },
+          },
+        }
+      );
 
-   return res.status(201).json({
-    "message":"successfuly",
-    "data":sideupdate,
-    "successfully process":sideupdate.modifiedCount
-  })  
+      return res.status(201).json({
+        message: "successfuly",
+        data: sideupdate,
+        "successfully process": sideupdate.modifiedCount,
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
 
-
-
-// DELETE NAV CHILD 
-
+// DELETE NAV CHILD
 
 router.post(
   "/deletenavchild",
   catchAsyncErrors(async (req, res, next) => {
     try {
-      // const {}= req.body;
-   const{caption,subnavrow,parent,parentrow }=req.body
-// const captionbody= req.body.caption;
-console.log(parentrow,"sii")
+  console.log(req.body)
+      const { childCaption, childrow, parentCaption, parentRow } = req.body;
+      // const captionbody= req.body.caption;
+      // console.log(req.body, "8");
+      // console.log(parentrow, "sii");
+      // const foundedwithId= await Sidebar.
+      const founded = await Sidebar.findOne({
+        caption: parentCaption,
+        row: parentRow,
+      });
+      console.log(founded, "hsfkj");
 
-    const founded = await Sidebar.findOne({ "caption":parent});
+      const sideupdate = await Sidebar.updateOne(
+        {
+          $and: [{ caption: parentCaption }, { row: parentRow },{ "children.caption": childCaption },{ "children.row": childrow }],
+        },
+        {
+          $pull: {
+            "children": {
+              
+              caption: childCaption,
 
-    if(founded){
-      // console.log(founded,"sii")
-    }
-  // const sideupdate=await Sidebar.findOneAndUpdate({'caption':req.body.parent},{ $set: {'childred.$.caption': req.body.subnav}})
-  const sideupdate= await Sidebar.updateOne(
-    {
-      $and :[{"caption": parent} ,{"row":parentrow}]
-    },
-    { $remove: { "children": {"caption": req.body.caption,"row":subnavrow,"floor":"2"
-    // "row":req.body.subnavrow,"floor":"2" , "_id" :new mongoose.Types.ObjectId(),"parentId":"Sidebar.caption"
-  } 
-  } }
-  );
+            },
+            
+          },
+        },
+        // {upsert: true}
+      );
 
-   return res.status(201).json({
-    "message":"successfuly",
-    "data":sideupdate,
-    "successfully process":sideupdate.modifiedCount
-  })  
+      // console.log(founded.children,"io");
+      // founded.children.forEach(element => {
+
+      //   // console.log(element.caption,"caption",childCaption)
+      //   // console.log(element.row,"row",childrow)
+
+      // if(element.caption===childCaption &&element.row===childrow){
+      //   console.log(element.caption,"caption",childCaption)
+      //   console.log(element._id,"caption",childCaption)
+
+      //  return element._id
+      // }}).
+
+      return res.status(201).json({
+        message: "successfuly",
+        sideupdate
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
 
-
-
 // router.get(
 //   "/getsidebar",
 //   catchAsyncErrors(async (req, res, next) => {
-   
+
 //     try {
 //     const sidebar =await Sidebar.find({});
 //       console.log("this is sidebar iiiiiii" ,sidebar)
-   
+
 //    return res.status(201).json({
 //       "message":"successfuly",
 //       sidebar:sidebar
-//     })    
+//     })
 //     } catch (error) {
 //       return next(new ErrorHandler(error.message, 500));
 //     }
@@ -549,15 +651,14 @@ console.log(parentrow,"sii")
 router.get(
   "/getsidebar",
   catchAsyncErrors(async (req, res, next) => {
-   
     try {
-    const sidebar =await Sidebar.find({}).sort({ row: 1 });
-      console.log("this is sidebar iiiiiii" ,sidebar)
-   
-   return res.status(201).json({
-      "message":"successfuly",
-      sidebar:sidebar
-    })    
+      const sidebar = await Sidebar.find({}).sort({ row: 1 });
+      console.log("this is sidebar iiiiiii", sidebar);
+
+      return res.status(201).json({
+        message: "successfuly",
+        sidebar: sidebar,
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -567,16 +668,16 @@ router.post(
   "/getsinglesidebar",
   catchAsyncErrors(async (req, res, next) => {
     try {
-      console.log("req.body" ,req.body)
-      const caption = req.body.data
+      console.log("req.body", req.body);
+      const caption = req.body.data;
 
-    const sidebar =await Sidebar.findOne({caption});
-    //   console.log("this is sidebar iiiiiii" ,sidebar)
-   
-   return res.status(201).json({
-      "message":"successfuly",
-      sidebar:sidebar
-    })    
+      const sidebar = await Sidebar.findOne({ caption });
+      //   console.log("this is sidebar iiiiiii" ,sidebar)
+
+      return res.status(201).json({
+        message: "successfuly",
+        sidebar: sidebar,
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -592,32 +693,122 @@ router.post(
 router.get(
   "/getsidebaroo",
   catchAsyncErrors(async (req, res, next) => {
-   
     try {
-      let oo= 4;
+      let oo = 4;
 
-      const side = await Sidebar.find({}).select(['-caption',"-childred","-floor","-_id","-__v"]).where("row").gt(4).sort({ row: 1 })
-      
-      let b=0;
-      for(b;b<side.length;b++){
-        console.log(side[b].row)
-        console.log(typeof(side[b].row.toString()))
-        const ioio=side[b].row;
-        const ss = await Sidebar.findOneAndUpdate( {row : ioio},{
-              row: parseInt(side[b].row)+1,
-           });
-           }
-           return res.status(201).json({
-            "message":"successfuly",
-            sidebar:side,
-            // sideba2r:side2
-      
-          })    
-          } catch (error) {
-            return next(new ErrorHandler(error.message, 500));
+      const side = await Sidebar.find({})
+        .select(["-caption", "-childred", "-floor", "-_id", "-__v"])
+        .where("row")
+        .gt(4)
+        .sort({ row: 1 });
+
+      let b = 0;
+      for (b; b < side.length; b++) {
+        console.log(side[b].row);
+        console.log(typeof side[b].row.toString());
+        const ioio = side[b].row;
+        const ss = await Sidebar.findOneAndUpdate(
+          { row: ioio },
+          {
+            row: parseInt(side[b].row) + 1,
           }
-        })
-      );
+        );
+      }
+      return res.status(201).json({
+        message: "successfuly",
+        sidebar: side,
+        // sideba2r:side2
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+
+
+
+
+
+
+router.post(
+  "/deletesidebar",
+  catchAsyncErrors(async (req, res, next) => {
+
+
+    try {
+      const { row , caption  } = req.body;
+      console.log(req.body,"sdjfojsdfo");
+      if (!row ||   !caption  ) {
+        return res.status(400).json({
+          message: "please inter inputs",
+        });
+      }
+      const captionduplicate = await Sidebar.findOne({ caption ,row});
+     
+      if(!captionduplicate){
+        return next(new ErrorHandler("sidebar not found", 400));
+      }
+      console.log(captionduplicate._id,"dsfjjshfkj")
+const idSliderFounded= captionduplicate._id;
+      await Sidebar.findByIdAndDelete({"_id":idSliderFounded})
+      
+      // if (findLike) {
+      //   console.log("na");
+      // }
+
+      // const sidebody = {
+      //   row,
+      //   caption,
+      // };
+      // const sidebar = await Sidebar.create({
+      //   row,
+      //   floor,
+      //   caption,
+      // });
+
+      return res.status(201).json({
+        message: "successfuly",
+      });
+
+
+      
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // let oo= 4;
 
 //       let side = await Sidebar.findByIdAndUpdate({}).select(['-caption',"-childred","-floor","-_id","-__v"]).where("row").gt(4).sort({ row: 1 }).then((res)=>{
@@ -634,63 +825,55 @@ router.get(
 //       })
 //       console.log(side)
 
-      // let side = await Sidebar.find() .select(['-caption',"-childred","-floor","-_id","-__v"]).sort({ row: 1 })
-      // console.log(side)
-      // let side2 = await Sidebar.find() .select(['-caption',"-childred","-floor","-row","-__v"]).sort({ row: 1 })
-      // let numberInput=4;
-      // side.map((e)=>{
-      // if(numberInput<e.row){
-      //   console.log(e.row)
-      //   // const user = await User.find({ row: e.row })
-      //   // .where("_id")
-      //   // .equals(resetCode);      }
+// let side = await Sidebar.find() .select(['-caption',"-childred","-floor","-_id","-__v"]).sort({ row: 1 })
+// console.log(side)
+// let side2 = await Sidebar.find() .select(['-caption',"-childred","-floor","-row","-__v"]).sort({ row: 1 })
+// let numberInput=4;
+// side.map((e)=>{
+// if(numberInput<e.row){
+//   console.log(e.row)
+//   // const user = await User.find({ row: e.row })
+//   // .where("_id")
+//   // .equals(resetCode);      }
 
+// }})
 
-      // }})
+//  const an= await Sidebar.find()
+//   .then((result)=>{
+//     (result.map((e)=>{
+//       // console.log("start",e.row)
+//       const dd= parseInt(e.row) + 1;
+//       const id = e._id;
+//       e.row=+1
 
-    //  const an= await Sidebar.find()
-    //   .then((result)=>{
-    //     (result.map((e)=>{
-    //       // console.log("start",e.row)
-    //       const dd= parseInt(e.row) + 1;
-    //       const id = e._id;
-    //       e.row=+1
+// console.log(id)
+// Sidebar.findByIdAndUpdate("6509342cee427043a7c120ad",{row:'12'})
+// console.log(dd)
 
-          // console.log(id)
-          // Sidebar.findByIdAndUpdate("6509342cee427043a7c120ad",{row:'12'})
-        // console.log(dd)
-   
-          // const finds= Sidebar.findById(myid)
-        //  console.log(finds)
-        //  const ii= Sidebar.findByIdAndUpdate("6509342cee427043a7c120ad",{row:11})
-        //  console.log(ii)
-      //   }))
+// const finds= Sidebar.findById(myid)
+//  console.log(finds)
+//  const ii= Sidebar.findByIdAndUpdate("6509342cee427043a7c120ad",{row:11})
+//  console.log(ii)
+//   }))
 
-      // })
-    
-    //   .catch((error)=>{
-    //     console.log(error)
-    // })
+// })
 
-    
-    
-    // console.log(object)
-      // side.updateMany(row,{side});
-      
-    
-    // console.log(side)
-    // console.log(side.length)
+//   .catch((error)=>{
+//     console.log(error)
+// })
 
-         
-  //   const user = await User.findByIdAndUpdate( id ,{
-  //     name: search,
-  //      exprience: exprience,
-  //      genre: selecetedHobby,
-  //      age: age,
-  //  });
+// console.log(object)
+// side.updateMany(row,{side});
 
+// console.log(side)
+// console.log(side.length)
 
-
+//   const user = await User.findByIdAndUpdate( id ,{
+//     name: search,
+//      exprience: exprience,
+//      genre: selecetedHobby,
+//      age: age,
+//  });
 
 // // update user info
 // router.put(
